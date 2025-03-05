@@ -5,9 +5,71 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>GHCloud.github.io</title>
 </head>
+   <meta charset="UTF-8">
+  <title>네비게이션 하이라이트 예제</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      justify-content: center;
+      font-family: sans-serif;
+    }
+    .nav-container {
+      position: relative;
+      background-color: #d3d3d3;
+      border-radius: 15px;
+      padding: 10px 20px;
+      display: inline-block;
+    }
+    .nav-item {
+      position: relative;
+      display: inline-block;
+      margin: 0 10px;
+      padding: 5px 10px;
+      cursor: pointer;
+      z-index: 2;
+    }
+    .highlight {
+      position: absolute;
+      background-color: #fff;
+      border-radius: 10px;
+      transition: all 0.3s ease;
+      z-index: 1;
+    }
+  </style>
 <body>
-  이건 고생끝에 만들어진 깃허브 블로그,,,,
-  <br>
-  하하하ㅏ하 ㅠㅠㅠㅠㅠ
+    <div class="nav-container">
+      <div class="highlight"></div>
+      <div class="nav-item">집</div>
+      <div class="nav-item">윤곽</div>
+      <div class="nav-item">연락하다</div>
+    </div>
+    <script>
+      const navItems = document.querySelectorAll('.nav-item');
+      const highlight = document.querySelector('.highlight');
+  
+      function moveHighlight(target) {
+        const targetRect = target.getBoundingClientRect();
+        const containerRect = target.parentElement.getBoundingClientRect();
+        const left = targetRect.left - containerRect.left;
+        const top = targetRect.top - containerRect.top;
+        
+        highlight.style.width = (targetRect.width - 4) + 'px';
+        highlight.style.height = (targetRect.height - 4) + 'px';
+        highlight.style.left = (left + 2) + 'px';
+        highlight.style.top = (top + 2) + 'px';
+      }
+  
+      navItems.forEach(item => {
+        item.addEventListener('click', () => moveHighlight(item));
+      });
+  
+      window.addEventListener('DOMContentLoaded', () => {
+        if(navItems.length > 0) {
+          moveHighlight(navItems[0]);
+        }
+      });
+    </script>
 </body>
 </html>
