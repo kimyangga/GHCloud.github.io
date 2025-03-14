@@ -25,7 +25,7 @@ export class Dialog {
 
   resize(stageWidth, stageHeight) {
     this.pos.x = Math.random() * (stageWidth - WIDTH);
-    thid.pos.y = Math.random() * (stageHeight - HEIGHT);
+    this.pos.y = Math.random() * (stageHeight - HEIGHT);
     this.target = this.pos.clone();
     this.prevPos = this.pos.clone();
   }
@@ -41,7 +41,7 @@ export class Dialog {
     this.prevPos = this.pos.clone();
   }
 
-  swingDrag(ctx) (
+  swingDrag(ctx) {
     const dx = this.pos.x - this.prevPos.x;
     const speed = Math.abs(dx) / FPS;
     const speed = Math.min(Math.max(speedX, 0), 1);
@@ -51,15 +51,15 @@ export class Dialog {
 
     this.rotation += (rotation - this.rotation) * ROTATION_SPEED;
 
-    const tmpPos = this.pis.clone().add(this.origin);
+    const tmpPos = this.pos.clone().add(this.origin);
     ctx.save();
     ctx.translate(tmpPos.x, tmpPos.y);
-    ctx.rotation(this.rotation * Math.PI / 180);
+    ctx.rotate(this.rotation * Math.PI / 180);
     ctx.beginPath();
     ctx.fillStyle = '#f4e55a';
-    ctx.tillRect(-this.origin.x, -this.origin.y, WIDTH, HEIGHT);
+    ctx.fillRect(-this.origin.x, -this.origin.y, WIDTH, HEIGHT);
     ctx.restore();
-  )
+  }
 
   down(point) {
     if (point.collide(this.pos, WIDTH, HEIGHT)) {
@@ -86,7 +86,7 @@ export class Dialog {
     }
   }
 
-  up() [
+  up() {
     this.isDown = false;
-  ]
+  }
 }
