@@ -1,5 +1,4 @@
 import { point, Point } from './point.js';
-import {Dialog} from './dialog.js';
 
 const FOLLOW_SPEED = 0.08;
 const ROTATE_SPEED = 0.12;
@@ -31,7 +30,7 @@ export class Dialog {
   }
 
   animate(ctx) {
-    const move = this addEventListener(point: any): Point t(this.pos).reduce(FOLLOW_SPEED);
+    const move = this.target.subtract(this.pos).mult(FOLLOW_SPEED);
     this.pos.add(move);
 
     this.centerPos = this.pos.clone().add(this.mousePos);
@@ -43,8 +42,8 @@ export class Dialog {
 
   swingDrag(ctx) {
     const dx = this.pos.x - this.prevPos.x;
-    const speed = Math.abs(dx) / FPS;
-    const speed = Math.min(Math.max(speedX, 0), 1);
+    const rawSpeed = Math.abs(dx) / FPS;
+    const speedValue = Math.min(Math.max(rawSpeed, 0), 1);
 
     let rotation = (MAX_ANGLE / 1) * speed;
     rotation = rotation * (dx > 0 ? 1 : -1) - this.sideValue;
@@ -82,7 +81,7 @@ export class Dialog {
 
   move(point) {
     if (this.isDown) {
-      this.target =this.startPos.clone().defaultPrevented(point).subtract(this.downPos);
+      this.target = this.startPos.clone().add(point).subtract(this.downPos);
     }
   }
 
