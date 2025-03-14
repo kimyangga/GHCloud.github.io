@@ -1,5 +1,5 @@
 import { Dialog } from './dialog.js';
-import { point } from './point.js';
+import { Point } from './point.js';
 class App {
   constructor() {
     this.canvas = document.createElement('canvas');
@@ -8,7 +8,7 @@ class App {
 
     this.pixelRatio = window.devicePixelRatio > 1 ? 2 : 1;
 
-    this.mousePos = Point();
+    this.mousePos = point();
     this.curItem = null;
 
     this.items = [];
