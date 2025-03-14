@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Draggable Responsive Squares</title>
+  <title>Draggable Squares with Smooth Snap</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
   <style>
     body {
@@ -19,19 +19,19 @@
       position: absolute;
       cursor: grab;
       user-select: none;
-      /* 옅은 그림자 효과 */
       box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
-      transition: transform 0.1s ease;
+      transition: transform 0.1s ease; /* 드래그 중 회전 효과용 */
     }
   </style>
 </head>
 <body>
   <script>
-    // 헬퍼 함수: 요소의 위치(사각형)를 반환
+    // 헬퍼: 요소의 위치(rectangle) 정보를 반환
     function getRect(element) {
       return element.getBoundingClientRect();
     }
-    // gap(여기서는 30px)만큼 확장된 영역과 겹치는지 체크하는 함수
+    
+    // gap만큼 확장된 영역을 고려해 충돌 여부를 판단
     function isColliding(elem1, elem2, gap) {
       const rect1 = getRect(elem1);
       const rect2 = getRect(elem2);
@@ -46,11 +46,12 @@
                rect1.bottom < extended.top ||
                rect1.top > extended.bottom);
     }
-
+    
     const numSquares = 5;
     const squares = [];
+    const gap = 30; // 최소 간격 30픽셀
 
-    // 랜덤 위치 생성 (정사각형 크기 260x260 고려)
+    // 무작위 위치 생성 (정사각형 크기 260x260 고려)
     function getRandomPosition() {
       const maxX = window.innerWidth - 260;
       const maxY = window.innerHeight - 260;
@@ -60,7 +61,7 @@
       };
     }
 
-    // 새로운 위치가 기존 정사각형과 gap(30px)을 두고 겹치지 않는지 검사
+    // 해당 정사각형이 주어진 (x,y) 위치에서 다른 정사각형과 gap 이상 떨어져 있는지 확인
     function isValidPosition(square, x, y, gap) {
       square.style.left = x + 'px';
       square.style.top = y + 'px';
@@ -73,7 +74,7 @@
       return true;
     }
 
-    // 정사각형 생성 (겹치지 않고 30px 간격 유지)
+    // 정사각형 생성 (겹치지 않고 최소 30픽셀 간격 유지)
     for (let i = 0; i < numSquares; i++) {
       const square = document.createElement('div');
       square.classList.add('square');
@@ -83,7 +84,7 @@
         pos = getRandomPosition();
         attempts++;
         if (attempts > 100) break;
-      } while (!isValidPosition(square, pos.x, pos.y, 30));
+      } while (!isValidPosition(square, pos.x, pos.y, gap));
       square.style.left = pos.x + 'px';
       square.style.top = pos.y + 'px';
       document.body.appendChild(square);
@@ -96,7 +97,7 @@
     let offsetY = 0;
     let lastX = 0;
     const maxAngle = 10;         // 최대 회전 각도 (deg)
-    const rotationFactor = 0.5;  // 수평 이동에 따른 회전 계수
+    const rotationFactor = 0.5;  // 마우스 수평 이동에 따른 회전 계수
 
     // 마우스 이벤트 핸들러
     function onMouseDown(e) {
@@ -111,13 +112,12 @@
     
     function onMouseMove(e) {
       if (currentSquare) {
-        // 정사각형 위치 업데이트
         const newLeft = e.clientX - offsetX;
         const newTop = e.clientY - offsetY;
         currentSquare.style.left = newLeft + 'px';
         currentSquare.style.top = newTop + 'px';
         
-        // 수평 이동(dx)에 따른 회전 계산 (반응형 흔들림)
+        // 수평 이동량(dx)에 따른 회전 효과 (드래그 방향 반응)
         const dx = e.clientX - lastX;
         lastX = e.clientX;
         let angle = dx * rotationFactor;
@@ -126,26 +126,65 @@
       }
     }
     
+    // 부드러운 스냅 기능: 드래그 종료 시, 주변과의 간격이 gap 미만이면 부드럽게 재배치
+    function snapSquare(square) {
+      let rect = getRect(square);
+      let targetLeft = parseInt(square.style.left, 10);
+      let targetTop = parseInt(square.style.top, 10);
+      let collisionFound = false;
+      
+      // 다른 모든 정사각형과의 간격 검사
+      for (const other of squares) {
+        if (other === square) continue;
+        if (isColliding(square, other, gap)) {
+          collisionFound = true;
+          const otherRect = getRect(other);
+          // 후보 위치 계산: 다른 사각형의 오른쪽, 왼쪽, 아래쪽, 위쪽에 gap을 두고 배치
+          const candidateRight = otherRect.right + gap;
+          const candidateLeft  = otherRect.left - rect.width - gap;
+          const candidateBottom = otherRect.bottom + gap;
+          const candidateTop = otherRect.top - rect.height - gap;
+          
+          // 현재 정사각형과의 수평, 수직 거리 차이를 계산
+          const deltaRight = Math.abs(candidateRight - rect.left);
+          const deltaLeft = Math.abs(candidateLeft - rect.left);
+          const deltaBottom = Math.abs(candidateBottom - rect.top);
+          const deltaTop = Math.abs(candidateTop - rect.top);
+          
+          // 가장 작은 조정량을 선택하여 스냅
+          const minDelta = Math.min(deltaRight, deltaLeft, deltaBottom, deltaTop);
+          if (minDelta === deltaRight) {
+            targetLeft = candidateRight;
+          } else if (minDelta === deltaLeft) {
+            targetLeft = candidateLeft;
+          } else if (minDelta === deltaBottom) {
+            targetTop = candidateBottom;
+          } else if (minDelta === deltaTop) {
+            targetTop = candidateTop;
+          }
+          // 한 번의 충돌 처리 후 break (여러 충돌 처리도 가능하나 여기서는 단순 처리)
+          break;
+        }
+      }
+      
+      if (collisionFound) {
+        square.style.transition = "left 0.5s ease, top 0.5s ease";
+        square.style.left = targetLeft + "px";
+        square.style.top = targetTop + "px";
+        square.addEventListener('transitionend', function handler() {
+          square.style.transition = "";
+          square.removeEventListener('transitionend', handler);
+        });
+      }
+    }
+    
     function onMouseUp() {
       if (currentSquare) {
         currentSquare.style.cursor = 'grab';
         // 드래그 종료 시 회전 효과 초기화
         currentSquare.style.transform = 'rotate(0deg)';
-        
-        // 다른 정사각형과 30px 간격이 부족하면 스냅 처리
-        for (const other of squares) {
-          if (other === currentSquare) continue;
-          if (isColliding(currentSquare, other, 30)) {
-            const otherRect = getRect(other);
-            // 간단한 스냅 처리: 현재 정사각형을 다른 정사각형의 오른쪽으로 배치
-            let newX = otherRect.right + 30;
-            // 화면을 벗어나지 않도록 조정
-            if (newX > window.innerWidth - 260) {
-              newX = otherRect.left - 260 - 30;
-            }
-            currentSquare.style.left = newX + 'px';
-          }
-        }
+        // 스냅 기능 적용: 주변 정사각형과의 gap이 부족하면 부드럽게 이동
+        snapSquare(currentSquare);
         currentSquare = null;
       }
     }
@@ -153,8 +192,6 @@
     document.addEventListener('mousedown', onMouseDown);
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
-    
-    // (선택사항) 창 크기가 변경되면 정사각형 위치 업데이트 등 추가 처리가 필요할 수 있음.
   </script>
 </body>
 </html>
