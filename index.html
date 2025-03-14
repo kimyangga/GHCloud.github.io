@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Draggable Shaky Squares</title>
+  <style>
+    body {
+      background-color: #7FFFD4;
+      margin: 0;
+      height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+    .square {
+      width: 260px;
+      height: 260px;
+      background-color: #FFFF00;
+      position: absolute;
+      cursor: grab;
+      user-select: none;
+    }
+  </style>
+</head>
+<body>
+  <script>
+    // 5개의 정사각형 생성 및 무작위 배치
+    const numSquares = 5;
+    const squares = [];
+    for (let i = 0; i < numSquares; i++) {
+      const square = document.createElement('div');
+      square.classList.add('square');
+      const maxX = window.innerWidth - 260;
+      const maxY = window.innerHeight - 260;
+      square.style.left = Math.floor(Math.random() * maxX) + 'px';
+      square.style.top = Math.floor(Math.random() * maxY) + 'px';
+      document.body.appendChild(square);
+      squares.push(square);
+    }
+    
+    // 드래그 및 흔들림 효과 관련 변수
+    let currentSquare = null;
+    let offsetX = 0;
+    let offsetY = 0;
+    let rotationAnimationFrame = null;
+
+    // 드래그 중 흔들림 효과를 주는 애니메이션 함수
+    function updateRotation() {
+      if (!currentSquare) return;
+      const amplitude = 5; // 회전 각도(최대 5도)
+      const frequency = 0.005; // 흔들림 주기 (값을 조절해 보세요)
+      const time = Date.now();
+      const angle = amplitude * Math.sin(time * frequency * 2 * Math.PI);
+      // 현재 정사각형에 회전 효과 적용
+      currentSquare.style.transform = `rotate(${angle}deg)`;
+      rotationAnimationFrame = requestAnimationFrame(updateRotation);
+    }
+    
+    function onMouseDown(e) {
+      if (e.target.classList.contains('square')) {
+        currentSquare = e.target;
+        offsetX = e.clientX - currentSquare.offsetLeft;
+        offsetY = e.clientY - currentSquare.offsetTop;
+        currentSquare.style.cursor = 'grabbing';
+        // 드래그 시 흔들림 효과 시작
+        rotationAnimationFrame = requestAnimationFrame(updateRotation);
+      }
+    }
+    
+    function onMouseMove(e) {
+      if (currentSquare) {
+        currentSquare.style.left = (e.clientX - offsetX) + 'px';
+        currentSquare.style.top = (e.clientY - offsetY) + 'px';
+      }
+    }
+    
+    function onMouseUp() {
+      if (currentSquare) {
+        currentSquare.style.cursor = 'grab';
+        // 드래그 종료 시 회전 효과 제거
+        currentSquare.style.transform = 'none';
+        cancelAnimationFrame(rotationAnimationFrame);
+        rotationAnimationFrame = null;
+        currentSquare = null;
+      }
+    }
+    
+    document.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('mousemove', onMouseMove);
+    document.addEventListener('mouseup', onMouseUp);
+  </script>
+</body>
+</html>
