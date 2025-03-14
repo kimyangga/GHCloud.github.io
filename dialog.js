@@ -1,4 +1,4 @@
-import { point, Point } from './point.js';
+import { point } from './point.js';
 
 const FOLLOW_SPEED = 0.08;
 const ROTATE_SPEED = 0.12;

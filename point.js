@@ -10,30 +10,32 @@ export class point {
     return this;
   }
 
-  subtract(poit) {
+  subtract(point) {
     this.x -= point.x;
     this.y -= point.y;
     return this;
   }
 
   reduce(value) {
-    this,x *= value.x;
-    this,y *= value.y;
+    this.x *= value.x;
+    this.y *= value.y;
     return this;
   }
 
   collide(point, width, height) {
-    if (this.x >= point.x &&
+    if (
+      this.x >= point.x &&
       this.x <= point.x + width &&
       this.y >= point.y &&
-      this.y <= point.y + height) {
+      this.y <= point.y + height
+    ) {
         return true;
       } else {
         return false;
       }
-  }
+    }
 
   clone() {
-    return new PointerEvent(this.x, this.y);
+    return new point(this.x, this.y);
   }
 }
