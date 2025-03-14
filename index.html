@@ -2,7 +2,8 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Draggable Shaky Squares</title>
+  <title>Draggable Responsive Squares</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=0">
   <style>
     body {
       background-color: #7FFFD4;
@@ -18,68 +19,133 @@
       position: absolute;
       cursor: grab;
       user-select: none;
+      /* 옅은 그림자 효과 */
+      box-shadow: 2px 2px 8px rgba(0,0,0,0.2);
+      transition: transform 0.1s ease;
     }
   </style>
 </head>
 <body>
   <script>
-    // 5개의 정사각형 생성 및 무작위 배치
+    // 헬퍼 함수: 요소의 위치(사각형)를 반환
+    function getRect(element) {
+      return element.getBoundingClientRect();
+    }
+    // gap(여기서는 30px)만큼 확장된 영역과 겹치는지 체크하는 함수
+    function isColliding(elem1, elem2, gap) {
+      const rect1 = getRect(elem1);
+      const rect2 = getRect(elem2);
+      const extended = {
+        left: rect2.left - gap,
+        right: rect2.right + gap,
+        top: rect2.top - gap,
+        bottom: rect2.bottom + gap
+      };
+      return !(rect1.right < extended.left ||
+               rect1.left > extended.right ||
+               rect1.bottom < extended.top ||
+               rect1.top > extended.bottom);
+    }
+
     const numSquares = 5;
     const squares = [];
+
+    // 랜덤 위치 생성 (정사각형 크기 260x260 고려)
+    function getRandomPosition() {
+      const maxX = window.innerWidth - 260;
+      const maxY = window.innerHeight - 260;
+      return {
+        x: Math.floor(Math.random() * maxX),
+        y: Math.floor(Math.random() * maxY)
+      };
+    }
+
+    // 새로운 위치가 기존 정사각형과 gap(30px)을 두고 겹치지 않는지 검사
+    function isValidPosition(square, x, y, gap) {
+      square.style.left = x + 'px';
+      square.style.top = y + 'px';
+      for (const other of squares) {
+        if (other === square) continue;
+        if (isColliding(square, other, gap)) {
+          return false;
+        }
+      }
+      return true;
+    }
+
+    // 정사각형 생성 (겹치지 않고 30px 간격 유지)
     for (let i = 0; i < numSquares; i++) {
       const square = document.createElement('div');
       square.classList.add('square');
-      const maxX = window.innerWidth - 260;
-      const maxY = window.innerHeight - 260;
-      square.style.left = Math.floor(Math.random() * maxX) + 'px';
-      square.style.top = Math.floor(Math.random() * maxY) + 'px';
+      let pos;
+      let attempts = 0;
+      do {
+        pos = getRandomPosition();
+        attempts++;
+        if (attempts > 100) break;
+      } while (!isValidPosition(square, pos.x, pos.y, 30));
+      square.style.left = pos.x + 'px';
+      square.style.top = pos.y + 'px';
       document.body.appendChild(square);
       squares.push(square);
     }
     
-    // 드래그 및 흔들림 효과 관련 변수
+    // 드래그 및 회전 효과 관련 변수
     let currentSquare = null;
     let offsetX = 0;
     let offsetY = 0;
-    let rotationAnimationFrame = null;
+    let lastX = 0;
+    const maxAngle = 10;         // 최대 회전 각도 (deg)
+    const rotationFactor = 0.5;  // 수평 이동에 따른 회전 계수
 
-    // 드래그 중 흔들림 효과를 주는 애니메이션 함수
-    function updateRotation() {
-      if (!currentSquare) return;
-      const amplitude = 5; // 회전 각도(최대 5도)
-      const frequency = 0.005; // 흔들림 주기 (값을 조절해 보세요)
-      const time = Date.now();
-      const angle = amplitude * Math.sin(time * frequency * 2 * Math.PI);
-      // 현재 정사각형에 회전 효과 적용
-      currentSquare.style.transform = `rotate(${angle}deg)`;
-      rotationAnimationFrame = requestAnimationFrame(updateRotation);
-    }
-    
+    // 마우스 이벤트 핸들러
     function onMouseDown(e) {
       if (e.target.classList.contains('square')) {
         currentSquare = e.target;
         offsetX = e.clientX - currentSquare.offsetLeft;
         offsetY = e.clientY - currentSquare.offsetTop;
+        lastX = e.clientX;
         currentSquare.style.cursor = 'grabbing';
-        // 드래그 시 흔들림 효과 시작
-        rotationAnimationFrame = requestAnimationFrame(updateRotation);
       }
     }
     
     function onMouseMove(e) {
       if (currentSquare) {
-        currentSquare.style.left = (e.clientX - offsetX) + 'px';
-        currentSquare.style.top = (e.clientY - offsetY) + 'px';
+        // 정사각형 위치 업데이트
+        const newLeft = e.clientX - offsetX;
+        const newTop = e.clientY - offsetY;
+        currentSquare.style.left = newLeft + 'px';
+        currentSquare.style.top = newTop + 'px';
+        
+        // 수평 이동(dx)에 따른 회전 계산 (반응형 흔들림)
+        const dx = e.clientX - lastX;
+        lastX = e.clientX;
+        let angle = dx * rotationFactor;
+        angle = Math.max(-maxAngle, Math.min(maxAngle, angle));
+        currentSquare.style.transform = `rotate(${angle}deg)`;
       }
     }
     
     function onMouseUp() {
       if (currentSquare) {
         currentSquare.style.cursor = 'grab';
-        // 드래그 종료 시 회전 효과 제거
-        currentSquare.style.transform = 'none';
-        cancelAnimationFrame(rotationAnimationFrame);
-        rotationAnimationFrame = null;
+        // 드래그 종료 시 회전 효과 초기화
+        currentSquare.style.transform = 'rotate(0deg)';
+        
+        // 다른 정사각형과 30px 간격이 부족하면 스냅 처리
+        for (const other of squares) {
+          if (other === currentSquare) continue;
+          if (isColliding(currentSquare, other, 30)) {
+            const otherRect = getRect(other);
+            // 간단한 스냅 처리: 현재 정사각형을 다른 정사각형의 오른쪽으로 배치
+            let newX = otherRect.right + 30;
+            // 화면을 벗어나지 않도록 조정
+            if (newX > window.innerWidth - 260) {
+              newX = otherRect.left - 260 - 30;
+            }
+            currentSquare.style.left = newX + 'px';
+          }
+        }
         currentSquare = null;
       }
     }
@@ -87,6 +153,8 @@
     document.addEventListener('mousedown', onMouseDown);
     document.addEventListener('mousemove', onMouseMove);
     document.addEventListener('mouseup', onMouseUp);
+    
+    // (선택사항) 창 크기가 변경되면 정사각형 위치 업데이트 등 추가 처리가 필요할 수 있음.
   </script>
 </body>
 </html>
