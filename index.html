@@ -1,68 +1,68 @@
-
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Shader with Webcam</title>
+  <meta charset="UTF-8">
+  <title>Floating Objects on Hover</title>
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="description" content="p5.js CDN Template" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/p5.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/0.7.3/addons/p5.dom.js"></script>
-  <script src="sketch.js"></script>
-  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      margin: 0;
+      height: 100vh;
+      background-color: #f0f0f0;
+      overflow: hidden;
+      position: relative;
+    }
+    /* 떠다니는 물체 스타일 */
+    .floating {
+      width: 100px;
+      height: 100px;
+      background-color: #ffcc00;
+      border-radius: 50%;
+      position: absolute;
+      /* 기본적으로 부드러운 떠다니는 애니메이션 */
+      animation: float 6s ease-in-out infinite;
+      transition: transform 0.3s ease;
+      /* 그림자 효과 */
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    }
+    @keyframes float {
+      0%   { transform: translate(0, 0); }
+      50%  { transform: translate(10px, 10px); }
+      100% { transform: translate(0, 0); }
+    }
+  </style>
 </head>
 <body>
+  <!-- 떠다니는 물체 3개 예시 -->
+  <div class="floating" id="obj1"></div>
+  <div class="floating" id="obj2"></div>
+  <div class="floating" id="obj3"></div>
+  
+  <script>
+    // 물체들을 화면에 무작위 위치로 배치
+    const floats = document.querySelectorAll('.floating');
+    floats.forEach(el => {
+      el.style.left = Math.random() * (window.innerWidth - 100) + 'px';
+      el.style.top  = Math.random() * (window.innerHeight - 100) + 'px';
+    });
     
-  <nav>
-        <ul class="nav-list">
-            <li><a href="https://muah-main-page.glitch.me/" class="main"><img src="https://cdn.glitch.global/095b5171-ea96-4c16-8267-fb1d6cb1d06c/Artboard%2011.svg?v=1717548302364"></a></li>
-            <li><a href="https://muah-dance-page.glitch.me/"class="dance"><img src="https://cdn.glitch.global/095b5171-ea96-4c16-8267-fb1d6cb1d06c/Artboard%207.svg?v=1718150708994"></a></li>
-            <li><a href="https://muah-keep-eyes.glitch.me/" class="eyes"><img src="https://cdn.glitch.global/095b5171-ea96-4c16-8267-fb1d6cb1d06c/Artboard%209.svg?v=1717547062337"></a></li>
-            <li><a href="https://muah-thumb-drawing.glitch.me/"class="thumb"><img src="https://cdn.glitch.global/095b5171-ea96-4c16-8267-fb1d6cb1d06c/Artboard%2010.svg?v=1717547064995"></a></li>
-            <li><a href="https://muah-pacify-page.glitch.me/" class="pacify"><img src="https://cdn.glitch.global/095b5171-ea96-4c16-8267-fb1d6cb1d06c/Artboard%208.svg?v=1717547069946"></a></li>
-        </ul>
-    </nav>
-  <div class="video-slider-container">
-
-<div id="video-container">
-    <!-- Video output will be inserted here -->
-  </div>
-  
-  <header>
-    <h1>
-        <a href="#" class="hoverText">어루만질 무(撫)(撫)
-            <span class="tooltip">무아지경
-                <span class="tooltip-text">안녕하세요. 이 프로젝트는 무아지경의 두 번째, 어루만질 무(撫)입니다.
-          저는 어렸을 때부터 만화경을 보는 걸 좋아했어요. 만화경을 이리 저리 돌려가며
-          만화경 속 세상이 보여주는 문양을 바라보면, 나도 그 문양이 된 것 같았어요!
-          이번에는 직접 그 문양이 되어보자고요. 옆에있는 슬라이더를 움직여보세요!
-          그럼 이제 무아지경이 되어볼까요?
-
-                </span>  
-
-            </span>
-          <br>되어보자
-        </a>
-    </h1>
-    <!-- Add slider elements below -->
-    <div class="slider-container">
-      <label class="slider-label" for="distortionSlider">Distortion</label>
-      <input type="range" min="0" max="1" step="0.01" value="0.1" class="slider" id="distortionSlider">
-    </div>
-    <div class="slider-container">
-      <label class="slider-label" for="distortionSlider2">Distortion 2</label>
-      <input type="range" min="0" max="1" step="0.01" value="0.1" class="slider" id="distortionSlider2">
-    </div>
-    <div class="slider-container">
-      <label class="slider-label" for="saturationSlider">Saturation</label>
-      <input type="range" min="0" max="2" step="0.01" value="1" class="slider" id="saturationSlider">
-    </div>
-    <div class="slider-container">
-      <label class="slider-label" for="hueSlider">Hue</label>
-      <input type="range" min="0" max="360" step="1" value="0" class="slider" id="hueSlider">
-    </div>
-  </header>
-  </div>
-  
-  <script src="https://button.glitch.me/button.js" data-style="glitch"></script>
+    // 마우스 호버 시 물체가 마우스 위치에 반응해 약간 이동하도록 처리
+    floats.forEach(el => {
+      el.addEventListener('mousemove', (e) => {
+        const rect = el.getBoundingClientRect();
+        // 마우스가 물체 내부에서 어느 정도 떨어져 있는지 계산
+        const offsetX = e.clientX - rect.left;
+        const offsetY = e.clientY - rect.top;
+        // 물체 중앙을 기준으로 한 상대 이동량 (감도는 /10으로 조정)
+        const moveX = (offsetX - rect.width / 2) / 10;
+        const moveY = (offsetY - rect.height / 2) / 10;
+        el.style.transform = `translate(${moveX}px, ${moveY}px)`;
+      });
+      // 마우스가 벗어나면 원래 상태로 복귀
+      el.addEventListener('mouseleave', () => {
+        el.style.transform = 'translate(0, 0)';
+      });
+    });
+  </script>
 </body>
 </html>
