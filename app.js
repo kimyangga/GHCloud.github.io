@@ -1,5 +1,7 @@
 import { Dialog } from './dialog.js';
 import { Point } from './point.js';
+import { point as Point } from './point.js';
+
 class App {
   constructor() {
     this.canvas = document.createElement('canvas');
