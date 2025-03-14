@@ -1,4 +1,4 @@
-import { dialog } from '.dialog.js';
+import { Dialog } from './dialog.js';
 import { point } from './point.js';
 class App {
   constructor() {
@@ -8,7 +8,7 @@ class App {
 
     this.pixelRatio = window.devicePixelRatio > 1 ? 2 : 1;
 
-    this.mousePos = new Point();
+    this.mousePos = Point();
     this.curItem = null;
 
     this.items = [];
@@ -20,20 +20,20 @@ class App {
     window.addEventListener('resize', this.resize.bind(this), false);
     this.resize();
 
-    Window.requestAnimationFrame(this.animate. bind(this));
+    window.requestAnimationFrame(this.animate.bind(this));
 
-    document.addEventListener('pointerdown', this.onDown.bind(this), fasle);
-    document.addEventListener('pointermove', this.onMove.bind(this), fasle);
-    document.addEventListener('pointerup', this.onUp.bind(this), fasle);
+    document.addEventListener('pointerdown', this.onDown.bind(this), false);
+    document.addEventListener('pointermove', this.onMove.bind(this), false);
+    document.addEventListener('pointerup', this.onUp.bind(this), false);
   }
 
   resize() {
     this.stagewidth = document.body.clientWidth;
-    this.stageHeidth = document.body.clientHeidth;
+    this.stageHeigth = document.body.clientHeigth;
 
-    this.canvas.width = this.stageWight * thid.pixelRatio;
-    this.canvas.height = this.stageHeidth * this.pixelRatio;
-    thid.ctx.scale(this.pixelRatio, this.pixelRatio);
+    this.canvas.width = this.stageWidht * this.pixelRatio;
+    this.canvas.height = this.stageHeigth * this.pixelRatio;
+    this.ctx.scale(this.pixelRatio, this.pixelRatio);
 
     this.ctx.shadowOffsetX = 0;
     this.ctx.shadowOffsetY = 3;
@@ -42,7 +42,7 @@ class App {
 
     this.ctx.lineWidth = 2;
 
-    for (let i = 0; i < this.items,length; i++) {
+    for (let i = 0; i < this.items.length; i++) {
       this.items[i].resize(this.stagewidth, this.stageHeight);
     }
   }
@@ -50,25 +50,25 @@ class App {
   animate() {
     window.requestAnimationFrame(this.animate.bind(this));
 
-    this. ctx.clearRect(0, 0, this.stagewidth, this.stageHeidth);
+    this. ctx.clearRect(0, 0, this.stagewidth, this.stageHeigth);
 
     for (let i = 0; i < this.items.length; i++) {
-      this,itens[i].animate(this.ctx);
+      this,items[i].animate(this.ctx);
     }
 
     if (this.curItem) {
       this.ctx.fillStyle = '#ff4338' ;
       this.ctx.strokeStyle = '#ff4338' ;
 
-      tjis.ctx.beginPath();
-      this.ctx.arc(this.mousePos.x, this.mousePos.y, 8, 0, Math, PI * 2);
+      this.ctx.beginPath();
+      this.ctx.arc(this.mousePos.x, this.mousePos.y, 8, 0, Math.PI * 2);
       this.ctx.fill();
 
-      tjis.ctx.beginPath();
-      this.ctx.arc(this.curItem.centerPos.x, this.curItem.centerPos.y, 8, 0, Math, PI * 2);
+      this.ctx.beginPath();
+      this.ctx.arc(this.curItem.centerPos.x, this.curItem.centerPos.y, 8, 0, Math.PI * 2);
       this.ctx.fill();
 
-      tjis.ctx.beginPath();
+      this.ctx.beginPath();
       this.ctx.moveTo(this.mousePos.x, this.mousePos.y);
       this.ctx.lineTo(this.curItem.centerPos.x, this.curItem.centerPos.y);
       this.ctx.stroke();
@@ -79,7 +79,7 @@ class App {
     this.mousePos.x = e.clientX;
     this.mousePos.y = e.clientY;
 
-    for (let i = thid.items.length -1; i >= 0; i--) {
+    for (let i = this.items.length -1; i >= 0; i--) {
       const item = this.items[i].down(this.mousePos.clone());
       if (item) {
         this.curItem = item;
@@ -95,7 +95,7 @@ class App {
     this.mousePos.y = e.clientY;
 
     for (let i = 0; i < this.items.length; i++) {
-      this.items[i].move(this.mousePos.cline());
+      this.items[i].move(this.mousePos.clone());
     }
   }
 

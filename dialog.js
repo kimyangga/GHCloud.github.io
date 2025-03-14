@@ -45,7 +45,7 @@ export class Dialog {
     const rawSpeed = Math.abs(dx) / FPS;
     const speedValue = Math.min(Math.max(rawSpeed, 0), 1);
 
-    let rotation = (MAX_ANGLE / 1) * speed;
+    let rotation = (MAX_ANGLE) * speedValue;
     rotation = rotation * (dx > 0 ? 1 : -1) - this.sideValue;
 
     this.rotation += (rotation - this.rotation) * ROTATION_SPEED;
