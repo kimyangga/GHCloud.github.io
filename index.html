@@ -1,86 +1,14 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <title>Mouse Repulsion Lego Block Effect</title>
-  <style>
-    body { margin: 0; overflow: hidden; }
-    canvas { display: block; }
-  </style>
-</head>
-<body>
-  <!-- Three.js 라이브러리 CDN -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-  <script>
-    let scene, camera, renderer, cube;
-    let mouse = new THREE.Vector2();
-    const repulsionForce = 0.05; // Repulsion force strength
-    const threshold = 1.0; // Minimum distance (in world units) for repulsion
-
-    init();
-    animate();
-
-    function init() {
-      // Create scene
-      scene = new THREE.Scene();
-      scene.background = new THREE.Color(0xf0f0f0);
-
-      // Create camera (FOV, aspect ratio, near/far planes)
-      camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
-      camera.position.z = 5;
-
-      // Create renderer
-      renderer = new THREE.WebGLRenderer({ antialias: true });
-      renderer.setSize(window.innerWidth, window.innerHeight);
-      document.body.appendChild(renderer.domElement);
-
-      // Create a cube representing a lego block
-      const geometry = new THREE.BoxGeometry(1, 1, 1);
-      const material = new THREE.MeshNormalMaterial();
-      cube = new THREE.Mesh(geometry, material);
-      scene.add(cube);
-
-      // Add event listeners
-      window.addEventListener('resize', onWindowResize, false);
-      window.addEventListener('mousemove', onMouseMove, false);
-    }
-
-    function onWindowResize() {
-      camera.aspect = window.innerWidth / window.innerHeight;
-      camera.updateProjectionMatrix();
-      renderer.setSize(window.innerWidth, window.innerHeight);
-    }
-
-    function onMouseMove(event) {
-      // Convert mouse position to normalized device coordinates (-1 to +1)
-      mouse.x = (event.clientX / window.innerWidth) * 2 - 1;
-      mouse.y = - (event.clientY / window.innerHeight) * 2 + 1;
-    }
-
-    function animate() {
-      requestAnimationFrame(animate);
-
-      // Convert normalized device coordinates to world coordinates on a plane at z=0
-      const vector = new THREE.Vector3(mouse.x, mouse.y, 0.5);
-      vector.unproject(camera);
-      const dir = vector.sub(camera.position).normalize();
-      const distance = - camera.position.z / dir.z;
-      const mouseWorldPos = camera.position.clone().add(dir.multiplyScalar(distance));
-
-      // Calculate the vector from the cube to the mouse world position
-      const diff = cube.position.clone().sub(mouseWorldPos);
-      const distanceToMouse = diff.length();
-
-      // Apply repulsion if the mouse is within the threshold distance
-      if (distanceToMouse < threshold) {
-        diff.normalize();
-        // The closer the mouse, the stronger the repulsion force
-        const force = repulsionForce * (threshold - distanceToMouse);
-        cube.position.add(diff.multiplyScalar(force));
-      }
-
-      renderer.render(scene, camera);
-    }
-  </script>
-</body>
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+    <link rel="icon" href="static/favicon.ico" type="image/x-icon">
+    <link rel="stylesheet" href="static/styles/main.css">
+    <title>Three.JS-Webpack Boilerplate</title>
+  </head>
+  <body>
+   
+    <script src="public/bundle.js"></script>
+  </body>
 </html>
